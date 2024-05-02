@@ -1,7 +1,7 @@
 Bid Blitzkrieg
 =========
 
-Bid Blitzkrieg is a powerful and feature-rich online auction platform built with Django, a high-level Python web framework. It provides a seamless and engaging experience for sellers to list their products, buyers to bid competitively, and administrators to manage the entire auction process efficiently.
+Bid Blitzkrieg is a powerful and feature-rich online auction platform built with Astro.JS, a modern framework for creating web applications. It provides a seamless and engaging experience for sellers to list their products, buyers to bid competitively, and administrators to manage the entire auction process efficiently.
 
 Key Features
 ------------
@@ -19,8 +19,7 @@ Key Features
 Technologies Used
 -----------------
 
--   Python
--   Django
+-   Astro.JS
 -   HTML/CSS
 -   JavaScript
 -   PostgreSQL
@@ -31,21 +30,20 @@ Getting Started
 Follow these steps to get the project up and running on your local machine:
 
 1.  Clone the repository: `git clone https://github.com/shujaamarwat/bid-blitzkrieg.git`
-2.  Install the required dependencies: `pip install -r requirements.txt`
-3.  Set up the database: `python manage.py migrate`
-4.  Create a superuser: `python manage.py createsuperuser`
-5.  Start the development server: `python manage.py runserver`
+2.  Install the required dependencies: `npm install`
+3.  Set up the database: `npm run setup-db`
+4.  Start the development server: `npm run dev`
 
 Contributing
-------------
+---------------
 
-We welcome contributions from the community! If you'd like to contribute to Bid Blitzkrieg, please follow these steps:
+We welcome contributions from the community! If you'd like to contribute to Astro.js, please follow these steps:
 
-1.  Fork the repository
-2.  Create a new branch: `git checkout -b my-feature-branch`
-3.  Make your changes and commit them: `git commit -m 'Add some feature'`
-4.  Push to the branch: `git push origin my-feature-branch`
-5.  Submit a pull request
+1. Fork the repository
+2. Create a new branch: `git checkout -b my-feature-branch`
+3. Make your changes and commit them: `git commit -m 'Add some feature'`
+4. Push to the branch: `git push origin my-feature-branch`
+5. Submit a pull request
 
 License
 -------
@@ -55,4 +53,4 @@ Bid Blitzkrieg is released under the MIT License.
 Acknowledgments
 ---------------
 
-We'd like to express our gratitude to the Django community for their continuous support and contributions to the framework.
+We'd like to express our gratitude to the Astro.JS community for their continuous support and contributions to the framework.
