@@ -160,8 +160,13 @@
                 <h6><i class="fas fa-chart-line"></i> Performance Summary</h6>
             </div>
             <div class="card-body">
-                {% set total_revenue = auctions|selectattr('winner')|map(attribute='current_bid')|sum %}
-                {% set avg_bids = (auctions|map(attribute='get_bid_count')|sum / auctions|length) if auctions else 0 %}
+                {% set won_auctions = auctions|selectattr('winner')|list %}
+                {% set total_revenue = won_auctions|map(attribute='current_bid')|sum %}
+                {% set total_bids = 0 %}
+                {% for auction in auctions %}
+                    {% set total_bids = total_bids + auction.get_bid_count() %}
+                {% endfor %}
+                {% set avg_bids = (total_bids / auctions|length) if auctions else 0 %}
                 
                 <div class="row">
                     <div class="col-6">
@@ -183,9 +188,9 @@
                 <h6><i class="fas fa-trophy"></i> Recent Winners</h6>
             </div>
             <div class="card-body">
-                {% set won_auctions = auctions|selectattr('winner')|list %}
-                {% if won_auctions %}
-                    {% for auction in won_auctions[:3] %}
+                {% set recent_won_auctions = won_auctions[:3] %}
+                {% if recent_won_auctions %}
+                    {% for auction in recent_won_auctions %}
                     <div class="d-flex justify-content-between mb-2">
                         <div>
                             <strong>{{ auction.title[:20] }}...</strong><br>
