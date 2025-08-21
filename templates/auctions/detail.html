@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}{{ auction.title }} - Bid Blitzkrieg{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            {% if auction.image_filename %}
+            <img src="{{ url_for('static', filename='uploads/' + auction.image_filename) }}" 
+                 class="card-img-top" style="height: 400px; object-fit: cover;" 
+                 alt="{{ auction.title }}">
+            {% else %}
+            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" 
+                 style="height: 400px;">
+                <i class="fas fa-image fa-5x text-muted"></i>
+            </div>
+            {% endif %}
+            
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h2 class="card-title">{{ auction.title }}</h2>
+                        {% if auction.category %}
+                        <span class="badge bg-secondary">{{ auction.category.name }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-{{ 'success' if auction.is_active else 'danger' if auction.is_ended else 'warning' }}">
+                            {% if auction.is_active %}
+                                Active
+                            {% elif auction.is_ended %}
+                                Ended
+                            {% else %}
+                                {{ auction.status.title() }}
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <p class="card-text">{{ auction.description }}</p>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Seller:</strong> {{ auction.seller.username }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Started:</strong> {{ auction.start_time|datetime }}
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Starting Bid:</strong> {{ auction.starting_bid|currency }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Ends:</strong> {{ auction.end_time|datetime }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Bidding Section -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5><i class="fas fa-gavel"></i> Current Bid</h5>
+            </div>
+            <div class="card-body text-center">
+                {% set highest_bid = auction.highest_bid %}
+                {% if highest_bid %}
+                    <h3 class="text-success">{{ highest_bid.amount|currency }}</h3>
+                    <p class="text-muted">by {{ highest_bid.bidder.username }}</p>
+                    <small class="text-muted">{{ highest_bid.timestamp|datetime }}</small>
+                {% else %}
+                    <h3 class="text-primary">{{ auction.starting_bid|currency }}</h3>
+                    <p class="text-muted">Starting bid</p>
+                {% endif %}
+                
+                <hr>
+                
+                <div class="mb-3">
+                    <strong>Total Bids:</strong> {{ auction.get_bid_count() }}
+                </div>
+                
+                {% if auction.time_remaining and auction.is_active %}
+                <div class="mb-3">
+                    <strong class="text-warning">
+                        <i class="fas fa-clock"></i> 
+                        <span class="countdown" data-end="{{ auction.end_time.isoformat() }}Z">
+                            Loading...
+                        </span>
+                    </strong>
+                </div>
+                {% endif %}
+                
+                <!-- Bid Form -->
+                {% if current_user.is_authenticated and auction.is_active and current_user.id != auction.seller_id %}
+                <form method="POST" action="{{ url_for('place_bid') }}" class="bid-form">
+                    {{ form.hidden_tag() }}
+                    {{ form.auction_id() }}
+                    
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            {{ form.amount(class="form-control", placeholder="Enter bid amount", step="0.01") }}
+                        </div>
+                        <div class="form-text">
+                            Minimum bid: {{ (highest_bid.amount + 0.01) if highest_bid else auction.starting_bid|currency }}
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success btn-lg w-100">
+                        <i class="fas fa-hand-paper"></i> Place Bid
+                    </button>
+                </form>
+                {% elif not current_user.is_authenticated %}
+                <div class="text-center">
+                    <p>Please <a href="{{ url_for('login') }}">login</a> to place bids</p>
+                </div>
+                {% elif current_user.id == auction.seller_id %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> This is your auction
+                </div>
+                {% elif not auction.is_active %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> 
+                    {% if auction.is_ended %}
+                    This auction has ended
+                    {% else %}
+                    This auction is not yet active
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                {% if auction.is_ended and auction.winner %}
+                <div class="alert alert-success">
+                    <i class="fas fa-trophy"></i> 
+                    <strong>Winner:</strong> {{ auction.winner.username }}<br>
+                    <strong>Winning Bid:</strong> {{ auction.current_bid|currency }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Bid History -->
+        {% if bids %}
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-history"></i> Recent Bids</h6>
+            </div>
+            <div class="card-body">
+                <div class="bid-history" style="max-height: 300px; overflow-y: auto;">
+                    {% for bid in bids %}
+                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                        <div>
+                            <strong>{{ bid.bidder.username }}</strong><br>
+                            <small class="text-muted">{{ bid.timestamp|datetime }}</small>
+                        </div>
+                        <div class="text-end">
+                            <strong class="text-success">{{ bid.amount|currency }}</strong>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

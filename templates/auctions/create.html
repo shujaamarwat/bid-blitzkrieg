@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Create Auction - Bid Blitzkrieg{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 offset-lg-2">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-plus-circle"></i> Create New Auction</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.title.label(class="form-label") }}
+                        {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else "")) }}
+                        {% if form.title.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.title.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows="4") }}
+                        {% if form.description.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.description.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">Provide a detailed description of your item.</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.starting_bid.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.starting_bid(class="form-control" + (" is-invalid" if form.starting_bid.errors else ""), step="0.01") }}
+                                {% if form.starting_bid.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.starting_bid.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            {{ form.category_id.label(class="form-label") }}
+                            {{ form.category_id(class="form-select" + (" is-invalid" if form.category_id.errors else "")) }}
+                            {% if form.category_id.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.category_id.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.image.label(class="form-label") }}
+                        {{ form.image(class="form-control" + (" is-invalid" if form.image.errors else ""), accept="image/*") }}
+                        {% if form.image.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.image.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">Upload an image of your item (JPG, PNG, GIF - Max 16MB).</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.start_time.label(class="form-label") }}
+                            {{ form.start_time(class="form-control" + (" is-invalid" if form.start_time.errors else "")) }}
+                            {% if form.start_time.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.start_time.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            {{ form.end_time.label(class="form-label") }}
+                            {{ form.end_time(class="form-control" + (" is-invalid" if form.end_time.errors else "")) }}
+                            {% if form.end_time.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.end_time.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Important:</strong> 
+                        {% if current_user.role == 'admin' %}
+                        Your auction will be activated immediately upon creation.
+                        {% else %}
+                        Your auction will be submitted for admin review before going live.
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check"></i> Create Auction
+                        </button>
+                        <a href="{{ url_for('seller_dashboard') }}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Set minimum date/time to now
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const isoString = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    
+    const startTimeInput = document.getElementById('start_time');
+    const endTimeInput = document.getElementById('end_time');
+    
+    if (startTimeInput) {
+        startTimeInput.min = isoString;
+        if (!startTimeInput.value) {
+            startTimeInput.value = isoString;
+        }
+    }
+    
+    if (endTimeInput) {
+        endTimeInput.min = isoString;
+    }
+    
+    // Update end time minimum when start time changes
+    if (startTimeInput && endTimeInput) {
+        startTimeInput.addEventListener('change', function() {
+            endTimeInput.min = this.value;
+            if (endTimeInput.value && endTimeInput.value <= this.value) {
+                const startTime = new Date(this.value);
+                startTime.setHours(startTime.getHours() + 1);
+                endTimeInput.value = startTime.toISOString().slice(0, 16);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

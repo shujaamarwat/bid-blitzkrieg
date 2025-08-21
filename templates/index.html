@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero-section bg-primary text-white rounded p-5 mb-5">
+    <div class="row align-items-center">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold">Welcome to Bid Blitzkrieg</h1>
+            <p class="lead">Discover unique items, place winning bids, and find treasures in our exciting online auctions.</p>
+            <div class="mt-4">
+                <a href="{{ url_for('auction_list') }}" class="btn btn-light btn-lg me-3">
+                    <i class="fas fa-search"></i> Browse Auctions
+                </a>
+                {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('register') }}" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-user-plus"></i> Join Now
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="text-center">
+                <i class="fas fa-gavel fa-10x opacity-25"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if auctions %}
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-fire"></i> Active Auctions</h2>
+        <a href="{{ url_for('auction_list') }}" class="btn btn-outline-primary">
+            View All <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+    
+    <div class="row">
+        {% for auction in auctions %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100">
+                {% if auction.image_filename %}
+                <img src="{{ url_for('static', filename='uploads/' + auction.image_filename) }}" 
+                     class="card-img-top" style="height: 200px; object-fit: cover;" 
+                     alt="{{ auction.title }}">
+                {% else %}
+                <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" 
+                     style="height: 200px;">
+                    <i class="fas fa-image fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+                
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ auction.title }}</h5>
+                    <p class="card-text flex-grow-1">{{ auction.description[:100] }}...</p>
+                    
+                    <div class="mb-3">
+                        {% if auction.current_bid > 0 %}
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">Current Bid:</small>
+                            <strong class="text-success">{{ auction.current_bid|currency }}</strong>
+                        </div>
+                        {% else %}
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">Starting Bid:</small>
+                            <strong>{{ auction.starting_bid|currency }}</strong>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">Bids:</small>
+                            <span class="badge bg-info">{{ auction.get_bid_count() }}</span>
+                        </div>
+                    </div>
+                    
+                    {% if auction.time_remaining %}
+                    <div class="mb-2">
+                        <small class="text-warning">
+                            <i class="fas fa-clock"></i> 
+                            <span class="countdown" data-end="{{ auction.end_time.isoformat() }}Z">
+                                Time remaining
+                            </span>
+                        </small>
+                    </div>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('auction_detail', id=auction.id) }}" 
+                       class="btn btn-primary">
+                        <i class="fas fa-eye"></i> View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<section class="mb-5">
+    <h2 class="mb-4"><i class="fas fa-tags"></i> Featured Categories</h2>
+    <div class="row">
+        {% for category in categories %}
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-cube fa-2x mb-2 text-primary"></i>
+                    <h5 class="card-title">{{ category.name }}</h5>
+                    <p class="card-text">{{ category.description or "Explore items in this category" }}</p>
+                    <a href="{{ url_for('auction_list', category=category.id) }}" 
+                       class="btn btn-outline-primary btn-sm">
+                        Browse
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        {% if categories|length == 0 %}
+        <div class="col-12">
+            <div class="text-center text-muted">
+                <i class="fas fa-box-open fa-3x mb-3"></i>
+                <p>No categories available yet. Check back soon!</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="bg-light rounded p-4 mb-5">
+    <div class="row">
+        <div class="col-md-4 text-center mb-3">
+            <i class="fas fa-search fa-3x text-primary mb-3"></i>
+            <h4>Discover</h4>
+            <p>Browse through hundreds of unique items from verified sellers.</p>
+        </div>
+        <div class="col-md-4 text-center mb-3">
+            <i class="fas fa-hand-paper fa-3x text-success mb-3"></i>
+            <h4>Bid</h4>
+            <p>Place competitive bids and watch your favorite auctions in real-time.</p>
+        </div>
+        <div class="col-md-4 text-center mb-3">
+            <i class="fas fa-trophy fa-3x text-warning mb-3"></i>
+            <h4>Win</h4>
+            <p>Win amazing items at great prices and get them delivered to you.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

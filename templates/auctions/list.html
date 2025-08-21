@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Auctions - Bid Blitzkrieg{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-search"></i> Browse Auctions</h2>
+    {% if current_user.is_authenticated and current_user.can_sell() %}
+    <a href="{{ url_for('create_auction') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Create Auction
+    </a>
+    {% endif %}
+</div>
+
+<!-- Search and Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Search</label>
+                <input type="text" name="search" class="form-control" 
+                       placeholder="Search auctions..." value="{{ search }}">
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">Category</label>
+                <select name="category" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" 
+                            {{ 'selected' if selected_category == category.id|string }}>
+                        {{ category.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="active" {{ 'selected' if selected_status == 'active' }}>Active</option>
+                    <option value="ended" {{ 'selected' if selected_status == 'ended' }}>Ended</option>
+                    <option value="all" {{ 'selected' if selected_status == 'all' }}>All</option>
+                </select>
+            </div>
+            
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary w-100">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Auction Results -->
+{% if auctions.items %}
+<div class="row">
+    {% for auction in auctions.items %}
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100">
+            {% if auction.image_filename %}
+            <img src="{{ url_for('static', filename='uploads/' + auction.image_filename) }}" 
+                 class="card-img-top" style="height: 200px; object-fit: cover;" 
+                 alt="{{ auction.title }}">
+            {% else %}
+            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" 
+                 style="height: 200px;">
+                <i class="fas fa-image fa-3x text-muted"></i>
+            </div>
+            {% endif %}
+            
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-0">{{ auction.title }}</h5>
+                    <span class="badge bg-{{ 'success' if auction.is_active else 'danger' if auction.is_ended else 'warning' }}">
+                        {% if auction.is_active %}
+                            Active
+                        {% elif auction.is_ended %}
+                            Ended
+                        {% else %}
+                            {{ auction.status.title() }}
+                        {% endif %}
+                    </span>
+                </div>
+                
+                {% if auction.category %}
+                <div class="mb-2">
+                    <small class="text-muted">
+                        <i class="fas fa-tag"></i> {{ auction.category.name }}
+                    </small>
+                </div>
+                {% endif %}
+                
+                <p class="card-text flex-grow-1">{{ auction.description[:100] }}...</p>
+                
+                <div class="mb-3">
+                    {% set highest_bid = auction.highest_bid %}
+                    {% if highest_bid %}
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">Current Bid:</small>
+                        <strong class="text-success">{{ highest_bid.amount|currency }}</strong>
+                    </div>
+                    {% else %}
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">Starting Bid:</small>
+                        <strong>{{ auction.starting_bid|currency }}</strong>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">Bids:</small>
+                        <span class="badge bg-info">{{ auction.get_bid_count() }}</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">Seller:</small>
+                        <span>{{ auction.seller.username }}</span>
+                    </div>
+                </div>
+                
+                {% if auction.time_remaining and auction.is_active %}
+                <div class="mb-3">
+                    <small class="text-warning">
+                        <i class="fas fa-clock"></i> 
+                        <span class="countdown" data-end="{{ auction.end_time.isoformat() }}Z">
+                            Time remaining
+                        </span>
+                    </small>
+                </div>
+                {% elif auction.is_ended %}
+                <div class="mb-3">
+                    <small class="text-muted">
+                        <i class="fas fa-flag-checkered"></i> 
+                        Ended {{ auction.end_time|datetime }}
+                    </small>
+                </div>
+                {% endif %}
+                
+                <a href="{{ url_for('auction_detail', id=auction.id) }}" 
+                   class="btn btn-primary">
+                    <i class="fas fa-eye"></i> View Details
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if auctions.pages > 1 %}
+<nav aria-label="Auction pagination">
+    <ul class="pagination justify-content-center">
+        {% if auctions.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('auction_list', page=auctions.prev_num, search=search, category=selected_category, status=selected_status) }}">
+                Previous
+            </a>
+        </li>
+        {% endif %}
+        
+        {% for page_num in auctions.iter_pages() %}
+            {% if page_num %}
+                {% if page_num != auctions.page %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('auction_list', page=page_num, search=search, category=selected_category, status=selected_status) }}">
+                        {{ page_num }}
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item active">
+                    <span class="page-link">{{ page_num }}</span>
+                </li>
+                {% endif %}
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">…</span>
+            </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if auctions.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('auction_list', page=auctions.next_num, search=search, category=selected_category, status=selected_status) }}">
+                Next
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="text-center py-5">
+    <i class="fas fa-search fa-5x text-muted mb-3"></i>
+    <h4>No auctions found</h4>
+    <p class="text-muted">Try adjusting your search criteria or check back later.</p>
+    {% if current_user.is_authenticated and current_user.can_sell() %}
+    <a href="{{ url_for('create_auction') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Create the First Auction
+    </a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
