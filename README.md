@@ -1,7 +1,7 @@
 Bid Blitzkrieg
 =========
 
-Bid Blitzkrieg is a powerful and feature-rich online auction platform built with Django, a high-level Python web framework. It provides a seamless and engaging experience for sellers to list their products, buyers to bid competitively, and administrators to manage the entire auction process efficiently.
+Bid Blitzkrieg is a powerful and feature-rich online auction platform built with Flask, a high-level Python web framework. It provides a seamless and engaging experience for sellers to list their products, buyers to bid competitively, and administrators to manage the entire auction process efficiently.
 
 Key Features
 ------------
