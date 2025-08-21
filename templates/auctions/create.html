@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Create Auction - Bid Blitzkrieg{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Header -->
+        <div class="d-flex align-items-center mb-4">
+            <a href="{{ url_for('seller_dashboard') }}" class="btn btn-outline-secondary me-3">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div>
+                <h2 class="mb-1"><i class="fas fa-plus-circle me-2"></i> Create New Auction</h2>
+                <p class="text-muted mb-0">List your item and start receiving bids from buyers</p>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4 p-lg-5">
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Basic Information Section -->
+                    <div class="mb-5">
+                        <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i> Basic Information</h5>
+                        
+                        <div class="mb-4">
+                            {{ form.title.label(class="form-label fw-semibold") }}
+                            {{ form.title(class="form-control form-control-lg" + (" is-invalid" if form.title.errors else ""), placeholder="Enter a compelling title for your auction") }}
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.title.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Create an eye-catching title that describes your item clearly</div>
+                        </div>
+
+                        <div class="mb-4">
+                            {{ form.description.label(class="form-label fw-semibold") }}
+                            {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows="5", placeholder="Describe your item in detail, including condition, features, and any relevant information...") }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Provide detailed information to help buyers make informed decisions</div>
+                        </div>
+                    </div>
+
+                    <!-- Pricing & Category Section -->
+                    <div class="mb-5">
+                        <h5 class="mb-3"><i class="fas fa-tags me-2"></i> Pricing & Category</h5>
+                        
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                {{ form.starting_bid.label(class="form-label fw-semibold") }}
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                                    {{ form.starting_bid(class="form-control" + (" is-invalid" if form.starting_bid.errors else ""), step="0.01", placeholder="0.00") }}
+                                    {% if form.starting_bid.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.starting_bid.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-text">Set a starting price that attracts bidders</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                {{ form.category_id.label(class="form-label fw-semibold") }}
+                                {{ form.category_id(class="form-select form-select-lg" + (" is-invalid" if form.category_id.errors else "")) }}
+                                {% if form.category_id.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.category_id.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Choose the most appropriate category</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image Upload Section -->
+                    <div class="mb-5">
+                        <h5 class="mb-3"><i class="fas fa-image me-2"></i> Product Image</h5>
+                        
+                        <div class="mb-4">
+                            {{ form.image.label(class="form-label fw-semibold") }}
+                            <div class="position-relative">
+                                {{ form.image(class="form-control form-control-lg" + (" is-invalid" if form.image.errors else ""), accept="image/*") }}
+                                {% if form.image.errors %}
+                                    <div class="invalid-feedback">
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="form-text">Upload high-quality images (JPG, PNG, GIF - Max 16MB) to attract more bidders</div>
+                        </div>
+                    </div>
+
+                    <!-- Auction Timing Section -->
+                    <div class="mb-5">
+                        <h5 class="mb-3"><i class="fas fa-clock me-2"></i> Auction Timing</h5>
+                        
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                {{ form.start_time.label(class="form-label fw-semibold") }}
+                                {{ form.start_time(class="form-control form-control-lg" + (" is-invalid" if form.start_time.errors else "")) }}
+                                {% if form.start_time.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.start_time.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">When should bidding begin?</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                {{ form.end_time.label(class="form-label fw-semibold") }}
+                                {{ form.end_time(class="form-control form-control-lg" + (" is-invalid" if form.end_time.errors else "")) }}
+                                {% if form.end_time.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.end_time.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">When should the auction close?</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Important Information -->
+                    <div class="alert alert-info border-0 bg-info bg-opacity-10">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-info-circle fa-lg text-info"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="alert-heading">Review Process</h6>
+                                {% if current_user.role == 'admin' %}
+                                Your auction will be activated immediately upon creation.
+                                {% else %}
+                                Your auction will be submitted for admin review before going live. You'll be notified once it's approved.
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-column flex-sm-row gap-3 justify-content-end">
+                        <a href="{{ url_for('seller_dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg px-4">
+                            <i class="fas fa-check me-2"></i> Create Auction
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Set minimum date/time to now
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const isoString = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    
+    const startTimeInput = document.getElementById('start_time');
+    const endTimeInput = document.getElementById('end_time');
+    
+    if (startTimeInput) {
+        startTimeInput.min = isoString;
+        if (!startTimeInput.value) {
+            startTimeInput.value = isoString;
+        }
+    }
+    
+    if (endTimeInput) {
+        endTimeInput.min = isoString;
+    }
+    
+    // Update end time minimum when start time changes
+    if (startTimeInput && endTimeInput) {
+        startTimeInput.addEventListener('change', function() {
+            endTimeInput.min = this.value;
+            if (endTimeInput.value && endTimeInput.value <= this.value) {
+                const startTime = new Date(this.value);
+                startTime.setHours(startTime.getHours() + 1);
+                endTimeInput.value = startTime.toISOString().slice(0, 16);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
