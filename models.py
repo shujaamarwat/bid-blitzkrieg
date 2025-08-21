@@ -63,22 +63,40 @@ class Auction(db.Model):
     @property
     def is_active(self):
         now = datetime.now(timezone.utc)
+        # Convert naive datetimes to timezone-aware if needed
+        start_time = self.start_time
+        end_time = self.end_time
+        if start_time.tzinfo is None:
+            start_time = start_time.replace(tzinfo=timezone.utc)
+        if end_time.tzinfo is None:
+            end_time = end_time.replace(tzinfo=timezone.utc)
         return (self.status == 'active' and 
-                self.start_time <= now <= self.end_time)
+                start_time <= now <= end_time)
 
     @property
     def is_ended(self):
         now = datetime.now(timezone.utc)
-        return now > self.end_time or self.status == 'completed'
+        # Convert naive datetime to timezone-aware if needed
+        end_time = self.end_time
+        if end_time.tzinfo is None:
+            end_time = end_time.replace(tzinfo=timezone.utc)
+        return now > end_time or self.status == 'completed'
 
     @property
     def time_remaining(self):
         if self.is_ended:
             return None
         now = datetime.now(timezone.utc)
-        if now < self.start_time:
-            return self.start_time - now
-        return self.end_time - now
+        # Convert naive datetimes to timezone-aware if needed
+        start_time = self.start_time
+        end_time = self.end_time
+        if start_time.tzinfo is None:
+            start_time = start_time.replace(tzinfo=timezone.utc)
+        if end_time.tzinfo is None:
+            end_time = end_time.replace(tzinfo=timezone.utc)
+        if now < start_time:
+            return start_time - now
+        return end_time - now
 
     @property
     def highest_bid(self):
