@@ -1,91 +1,119 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="hero-section bg-primary text-white rounded p-5 mb-5">
-    <div class="row align-items-center">
-        <div class="col-lg-6">
-            <h1 class="display-4 fw-bold">Welcome to Bid Blitzkrieg</h1>
-            <p class="lead">Discover unique items, place winning bids, and find treasures in our exciting online auctions.</p>
-            <div class="mt-4">
-                <a href="{{ url_for('auction_list') }}" class="btn btn-light btn-lg me-3">
-                    <i class="fas fa-search"></i> Browse Auctions
-                </a>
-                {% if not current_user.is_authenticated %}
-                <a href="{{ url_for('register') }}" class="btn btn-outline-light btn-lg">
-                    <i class="fas fa-user-plus"></i> Join Now
-                </a>
-                {% endif %}
+<!-- Hero Section -->
+<div class="hero-section position-relative overflow-hidden rounded-4 mb-5" style="background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-info) 100%);">
+    <div class="position-absolute top-0 end-0 opacity-10" style="font-size: 20rem; line-height: 1; margin-top: -2rem; margin-right: -2rem;">
+        <i class="fas fa-gavel"></i>
+    </div>
+    <div class="p-4 p-md-5">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <div class="text-white">
+                    <h1 class="display-4 fw-bold mb-3 text-white">Welcome to Bid Blitzkrieg</h1>
+                    <p class="lead mb-4 text-white-50">Discover unique treasures, place competitive bids, and win amazing items in our thrilling online auction marketplace.</p>
+                    <div class="d-flex flex-column flex-sm-row gap-3">
+                        <a href="{{ url_for('auction_list') }}" class="btn btn-light btn-lg shadow-sm px-4">
+                            <i class="fas fa-search me-2"></i> Browse Auctions
+                        </a>
+                        {% if not current_user.is_authenticated %}
+                        <a href="{{ url_for('register') }}" class="btn btn-outline-light btn-lg px-4">
+                            <i class="fas fa-user-plus me-2"></i> Join Now
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="text-center">
-                <i class="fas fa-gavel fa-10x opacity-25"></i>
+            <div class="col-lg-5 d-none d-lg-block">
+                <div class="text-center position-relative">
+                    <div class="bg-white bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 200px; height: 200px;">
+                        <i class="fas fa-gavel fa-4x text-white"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 {% if auctions %}
+<!-- Featured Auctions Section -->
 <section class="mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-fire"></i> Active Auctions</h2>
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4 gap-3">
+        <div>
+            <h2 class="mb-1"><i class="fas fa-fire me-2 text-danger"></i> Hot Auctions</h2>
+            <p class="text-muted mb-0">Don't miss out on these exciting opportunities</p>
+        </div>
         <a href="{{ url_for('auction_list') }}" class="btn btn-outline-primary">
-            View All <i class="fas fa-arrow-right"></i>
+            View All <i class="fas fa-arrow-right ms-2"></i>
         </a>
     </div>
     
-    <div class="row">
+    <div class="row g-4">
         {% for auction in auctions %}
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="card h-100">
-                {% if auction.image_filename %}
-                <img src="{{ url_for('static', filename='uploads/' + auction.image_filename) }}" 
-                     class="card-img-top" style="height: 200px; object-fit: cover;" 
-                     alt="{{ auction.title }}">
-                {% else %}
-                <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" 
-                     style="height: 200px;">
-                    <i class="fas fa-image fa-3x text-muted"></i>
-                </div>
-                {% endif %}
-                
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">{{ auction.title }}</h5>
-                    <p class="card-text flex-grow-1">{{ auction.description[:100] }}...</p>
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 border-0 shadow-sm hover-lift" style="transition: transform 0.2s ease-in-out;">
+                <div class="position-relative">
+                    {% if auction.image_filename %}
+                    <img src="{{ url_for('static', filename='uploads/' + auction.image_filename) }}" 
+                         class="card-img-top rounded-top" style="height: 220px; object-fit: cover;" 
+                         alt="{{ auction.title }}">
+                    {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center rounded-top" 
+                         style="height: 220px;">
+                        <div class="text-center">
+                            <i class="fas fa-image fa-2x text-muted mb-2"></i>
+                            <p class="text-muted small mb-0">No image</p>
+                        </div>
+                    </div>
+                    {% endif %}
                     
-                    <div class="mb-3">
-                        {% if auction.current_bid > 0 %}
-                        <div class="d-flex justify-content-between">
-                            <small class="text-muted">Current Bid:</small>
-                            <strong class="text-success">{{ auction.current_bid|currency }}</strong>
+                    {% if auction.is_active %}
+                    <span class="position-absolute top-0 start-0 m-3 badge bg-success">
+                        <i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i> Live
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <div class="card-body p-4">
+                    <h5 class="card-title fw-semibold mb-2">{{ auction.title }}</h5>
+                    <p class="card-text text-muted small mb-3 lh-sm">{{ auction.description[:120] }}{{ '...' if auction.description|length > 120 else '' }}</p>
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            {% if auction.current_bid > 0 %}
+                            <div class="text-center">
+                                <p class="small text-muted mb-1">Current Bid</p>
+                                <h6 class="text-success mb-0">{{ auction.current_bid|currency }}</h6>
+                            </div>
+                            {% else %}
+                            <div class="text-center">
+                                <p class="small text-muted mb-1">Starting Bid</p>
+                                <h6 class="mb-0">{{ auction.starting_bid|currency }}</h6>
+                            </div>
+                            {% endif %}
                         </div>
-                        {% else %}
-                        <div class="d-flex justify-content-between">
-                            <small class="text-muted">Starting Bid:</small>
-                            <strong>{{ auction.starting_bid|currency }}</strong>
-                        </div>
-                        {% endif %}
-                        
-                        <div class="d-flex justify-content-between">
-                            <small class="text-muted">Bids:</small>
-                            <span class="badge bg-info">{{ auction.get_bid_count() }}</span>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <p class="small text-muted mb-1">Total Bids</p>
+                                <span class="badge bg-info-subtle text-info border border-info fs-6">{{ auction.get_bid_count() }}</span>
+                            </div>
                         </div>
                     </div>
                     
-                    {% if auction.time_remaining %}
-                    <div class="mb-2">
-                        <small class="text-warning">
-                            <i class="fas fa-clock"></i> 
-                            <span class="countdown" data-end="{{ auction.end_time.isoformat() }}Z">
-                                Time remaining
-                            </span>
-                        </small>
+                    {% if auction.time_remaining and auction.is_active %}
+                    <div class="bg-warning bg-opacity-10 rounded px-3 py-2 mb-3">
+                        <div class="d-flex align-items-center text-warning">
+                            <i class="fas fa-clock me-2"></i>
+                            <small class="countdown fw-semibold" data-end="{{ auction.end_time.isoformat() }}Z">
+                                Loading...
+                            </small>
+                        </div>
                     </div>
                     {% endif %}
                     
                     <a href="{{ url_for('auction_detail', id=auction.id) }}" 
-                       class="btn btn-primary">
-                        <i class="fas fa-eye"></i> View Details
+                       class="btn btn-primary w-100 shadow-sm">
+                        <i class="fas fa-eye me-2"></i> View & Bid
                     </a>
                 </div>
             </div>
@@ -95,53 +123,125 @@
 </section>
 {% endif %}
 
+<!-- Categories Section -->
 <section class="mb-5">
-    <h2 class="mb-4"><i class="fas fa-tags"></i> Featured Categories</h2>
-    <div class="row">
+    <div class="text-center mb-5">
+        <h2 class="mb-3"><i class="fas fa-tags me-2"></i> Browse by Category</h2>
+        <p class="text-muted">Find exactly what you're looking for in our organized categories</p>
+    </div>
+    
+    <div class="row g-4">
         {% for category in categories %}
-        <div class="col-md-3 col-sm-6 mb-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <i class="fas fa-cube fa-2x mb-2 text-primary"></i>
-                    <h5 class="card-title">{{ category.name }}</h5>
-                    <p class="card-text">{{ category.description or "Explore items in this category" }}</p>
-                    <a href="{{ url_for('auction_list', category=category.id) }}" 
-                       class="btn btn-outline-primary btn-sm">
-                        Browse
-                    </a>
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <a href="{{ url_for('auction_list', category=category.id) }}" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm text-center hover-lift" style="transition: all 0.3s ease;">
+                    <div class="card-body p-4">
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            {% set category_icons = {
+                                'Electronics': 'laptop',
+                                'Collectibles': 'gem',
+                                'Art & Crafts': 'palette',
+                                'Home & Garden': 'home',
+                                'Fashion': 'tshirt',
+                                'Books & Media': 'book'
+                            } %}
+                            <i class="fas fa-{{ category_icons.get(category.name, 'cube') }} fa-lg text-primary"></i>
+                        </div>
+                        <h6 class="card-title fw-semibold mb-2">{{ category.name }}</h6>
+                        <p class="card-text small text-muted lh-sm">{{ category.description[:60] if category.description else "Explore items in this category" }}{{ '...' if category.description and category.description|length > 60 else '' }}</p>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
         {% endfor %}
         
         {% if categories|length == 0 %}
         <div class="col-12">
-            <div class="text-center text-muted">
-                <i class="fas fa-box-open fa-3x mb-3"></i>
-                <p>No categories available yet. Check back soon!</p>
+            <div class="text-center py-5">
+                <div class="bg-light bg-opacity-50 rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 120px; height: 120px;">
+                    <i class="fas fa-box-open fa-3x text-muted"></i>
+                </div>
+                <h5 class="text-muted">No categories available yet</h5>
+                <p class="text-muted">Check back soon for exciting new categories!</p>
             </div>
         </div>
         {% endif %}
     </div>
 </section>
 
-<section class="bg-light rounded p-4 mb-5">
-    <div class="row">
-        <div class="col-md-4 text-center mb-3">
-            <i class="fas fa-search fa-3x text-primary mb-3"></i>
-            <h4>Discover</h4>
-            <p>Browse through hundreds of unique items from verified sellers.</p>
+<!-- How It Works Section -->
+<section class="py-5 mb-5" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+    <div class="text-center mb-5">
+        <h2 class="mb-3">How Bid Blitzkrieg Works</h2>
+        <p class="text-muted">Simple, secure, and exciting online auctions</p>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="text-center h-100">
+                <div class="position-relative mb-4">
+                    <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px;">
+                        <i class="fas fa-search fa-2x text-white"></i>
+                    </div>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.9rem;">1</span>
+                </div>
+                <h4 class="fw-semibold mb-3">Discover</h4>
+                <p class="text-muted">Browse through thousands of unique items from verified sellers across multiple categories and find your perfect treasure.</p>
+            </div>
         </div>
-        <div class="col-md-4 text-center mb-3">
-            <i class="fas fa-hand-paper fa-3x text-success mb-3"></i>
-            <h4>Bid</h4>
-            <p>Place competitive bids and watch your favorite auctions in real-time.</p>
+        
+        <div class="col-md-4">
+            <div class="text-center h-100">
+                <div class="position-relative mb-4">
+                    <div class="bg-success rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px;">
+                        <i class="fas fa-hand-paper fa-2x text-white"></i>
+                    </div>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.9rem;">2</span>
+                </div>
+                <h4 class="fw-semibold mb-3">Bid Smart</h4>
+                <p class="text-muted">Place competitive bids on your favorite items, watch auctions in real-time, and get notifications on bid updates.</p>
+            </div>
         </div>
-        <div class="col-md-4 text-center mb-3">
-            <i class="fas fa-trophy fa-3x text-warning mb-3"></i>
-            <h4>Win</h4>
-            <p>Win amazing items at great prices and get them delivered to you.</p>
+        
+        <div class="col-md-4">
+            <div class="text-center h-100">
+                <div class="position-relative mb-4">
+                    <div class="bg-warning rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px;">
+                        <i class="fas fa-trophy fa-2x text-white"></i>
+                    </div>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.9rem;">3</span>
+                </div>
+                <h4 class="fw-semibold mb-3">Win & Enjoy</h4>
+                <p class="text-muted">Win amazing items at unbeatable prices and enjoy secure payment processing with fast, reliable delivery.</p>
+            </div>
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.hover-lift:hover {
+    transform: translateY(-5px);
+}
+
+.hero-section {
+    position: relative;
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .hero-section .position-absolute {
+        display: none !important;
+    }
+    
+    .display-4 {
+        font-size: 2.5rem;
+    }
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+</style>
 {% endblock %}
