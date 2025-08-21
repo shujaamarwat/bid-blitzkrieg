@@ -81,7 +81,7 @@ with app.app_context():
     db.create_all()
     
     # Create admin user if it doesn't exist
-    from models import User
+    from models import User, Category
     from werkzeug.security import generate_password_hash
     
     admin = User.query.filter_by(email='admin@auction.com').first()
@@ -95,3 +95,21 @@ with app.app_context():
         db.session.add(admin)
         db.session.commit()
         print("Created admin user: admin@auction.com / admin123")
+    
+    # Create default categories if they don't exist
+    default_categories = [
+        {'name': 'Electronics', 'description': 'Computers, phones, gadgets and electronic devices'},
+        {'name': 'Collectibles', 'description': 'Rare items, antiques, and collectible memorabilia'},
+        {'name': 'Art & Crafts', 'description': 'Paintings, sculptures, handmade items and artwork'},
+        {'name': 'Home & Garden', 'description': 'Furniture, decor, tools and garden equipment'},
+        {'name': 'Fashion', 'description': 'Clothing, accessories, shoes and fashion items'},
+        {'name': 'Books & Media', 'description': 'Books, movies, music and educational materials'}
+    ]
+    
+    for cat_data in default_categories:
+        existing = Category.query.filter_by(name=cat_data['name']).first()
+        if not existing:
+            category = Category(name=cat_data['name'], description=cat_data['description'])
+            db.session.add(category)
+    
+    db.session.commit()

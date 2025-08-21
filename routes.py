@@ -162,7 +162,7 @@ def create_auction():
                 filename = timestamp + filename
                 
                 # Ensure upload directory exists
-                upload_path = os.path.join(current_app.instance_path, 'static', 'uploads')
+                upload_path = os.path.join('static', 'uploads')
                 os.makedirs(upload_path, exist_ok=True)
                 
                 file.save(os.path.join(upload_path, filename))
